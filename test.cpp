@@ -79,3 +79,36 @@ TEST(SearchTree, Erase) {
 		set.erase(i);
 	EXPECT_TRUE(set.empty());
 }
+
+TEST(AVLTree, RotateRight) {
+	std::vector<T> v{{3, 4, 2, 1, 0}};
+	AVL::AVL_set_t<T> set{v.begin(), v.end()};
+	auto el = set.min();
+	for (auto i = 0; i < 5; i++) {
+		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
+		el = el->next();
+	}
+}
+
+TEST(AVLTree, RotateLeft) {
+	std::vector<T> v{{1, 0, 2, 3, 4}};
+	AVL::AVL_set_t<T> set{v.begin(), v.end()};
+	auto el = set.min();
+	for (auto i = 0; i < 5; i++) {
+		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
+		el = el->next();
+	}
+}
+
+TEST(AVLTree, Insert) {
+	AVL::AVL_set_t<T> set;
+	std::default_random_engine e;
+	std::uniform_int_distribution<int> distr{0, ksize};
+	for (auto i = 0; i < ksize; i++)
+		set.insert(distr(e));
+	auto el = set.min();
+	for (auto i = 0; i < ksize; i++) {
+		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
+		el = el->next();
+	}
+}

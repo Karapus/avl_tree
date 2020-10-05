@@ -61,11 +61,12 @@ class AVL_tree_t {
 	AVL_tree_t *parent_,
 		   *left_ = nullptr,
 		   *right_ = nullptr;
-	std::size_t h_ = 0;
+	signed char h_dif_ = 0;
+	private:
 
 	void transplant(AVL_tree_t *node);
 
-	AVL_tree_t balance(AVL_tree_t *root);
+	AVL_tree_t *balance(AVL_tree_t *root);
 	AVL_tree_t *rotateLeft(AVL_tree_t *root);
 	AVL_tree_t *rotateRight(AVL_tree_t *root);
 	AVL_tree_t *bigRotateLeft(AVL_tree_t *root) {
@@ -89,6 +90,9 @@ class AVL_tree_t {
 
 	T get_val() const {
 		return val_;
+	}
+	int get_h_dif() const {
+		return h_dif_;
 	}
 	const AVL_tree_t *get_left() const {
 		return left_;
@@ -124,17 +128,33 @@ template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 	if (!root)
 		return new AVL_tree_t(elem);
-	h_++;
 	if (elem < val_) {
 		if (left_)
 			return left_->insert(elem, root);
 		left_ = new AVL_tree_t(elem, this);
+		h_dif_++;
 	}
 	else if (right_)
 		return right_->insert(elem, root);
-	else
+	else {
 		right_ = new AVL_tree_t(elem, this);
-	return balance(root);
+		h_dif_--;
+	}
+	auto node = this;
+	while (node->parent_) {
+		auto prev = node;
+		node = node->parent_;
+		if (node->left_ == prev)
+			node->h_dif_++;
+		else
+			node->h_dif_--;
+		if (!node->h_dif_)
+			return root;
+		root = node->balance(root);
+		if (!node->h_dif_)
+			return root;
+	}
+	return root;
 }
 
 template <typename T>
@@ -314,21 +334,75 @@ void AVL_tree_t<T>::delete_tree() {
 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::balance(AVL_tree_t<T> *root) {
+	if (h_dif_ == -2) {
+		if (right_->h_dif_ <= 0) {
+			if (right_->h_dif_)
+				h_dif_ = right_->h_dif_ = 0;
+			else {
+				h_dif_ = -1;
+				right_->h_dif_ = 1;
+			}
+			return rotateLeft(root);
+		}
+		else {
+			switch (right_->left_->h_dif_) {
+				case -1:
+					h_dif_ = 1;
+					right_->h_dif_ = 0;
+					break;
+				case 0:
+					h_dif_ = right_->h_dif_ = 0;
+					break;
+				case 1:
+					h_dif_ = 0;
+					right_->h_dif_ = -1;
+					break;
+			}
+			right_->left_->h_dif_ = 0;
+			return bigRotateLeft(root);
+		}
+	}
+	else if (h_dif_ == 2) {
+		if (left_->h_dif_ >= 0) {
+			if (left_->h_dif_)
+				h_dif_ = left_->h_dif_ = 0;
+			else {
+				h_dif_ = 1;
+				left_->h_dif_ = -1;
+			}
+			return rotateRight(root);
+		}
+		else {
+			switch (left_->right_->h_dif_) {
+				case -1:
+					h_dif_ = -1;
+					left_->h_dif_ = 0;
+					break;
+				case 0:
+					h_dif_ = left_->h_dif_ = 0;
+					break;
+				case 1:
+					h_dif_ = 0;
+					left_->h_dif_ = 1;
+					break;
+			}
+			left_->right_->h_dif_ = 0;
+			return bigRotateRight(root);
+		}
+	}
 	return root;
 }
 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::rotateLeft(AVL_tree_t<T> *root) {
-	assert(right_);
 	AVL_tree_t *going_up = right_;
 	AVL_tree_t *trfd_subtree = going_up->left_;
 	
 	if (trfd_subtree)
-		trfd_subtree->parent = this;
+		trfd_subtree->parent_ = this;
 	right_ = trfd_subtree;
 	
-	AVL_tree_t *new_root = root;
-	AVL_tree_t *&ptr_to_this = (parent_) 	? ((parent_->left_ == this())	? parent_->left_ 
+	AVL_tree_t *&ptr_to_this = (parent_) 	? ((parent_->left_ == this)	? parent_->left_ 
 										: parent_->right_)
 						: root;
 	ptr_to_this = going_up;
@@ -337,30 +411,27 @@ AVL_tree_t<T> *AVL_tree_t<T>::rotateLeft(AVL_tree_t<T> *root) {
 	parent_ = going_up;
 	going_up->left_ = this;
 
-	going_up->h_++;
-	h_--;
-	return new_root;
+	return root;
 }
 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::rotateRight(AVL_tree_t<T> *root) {
-	assert(left_);
 	AVL_tree_t *going_up = left_;
 	AVL_tree_t *trfd_subtree = going_up->right_;
 	
 	if (trfd_subtree)
-		trfd_subtree->parent = this;
+		trfd_subtree->parent_ = this;
 	left_ = trfd_subtree;
 
-	AVL_tree_t *new_root = root;
-	AVL_tree_t *&ptr_to_this = (parent_) 	? ((parent_->left_ == this())	? parent_->left_ 
+	AVL_tree_t *&ptr_to_this = (parent_) 	? ((parent_->left_ == this)	? parent_->left_ 
 										: parent_->right_)
-						: new_root;
+						: root;
 	ptr_to_this = going_up;
 	going_up->parent_ = parent_;
 	
 	parent_ = going_up;
 	going_up->right_ = this;
-	return new_root;
+
+	return root;
 }
 }
