@@ -65,6 +65,7 @@ class AVL_tree_t {
 
 	void transplant(AVL_tree_t *node);
 
+	AVL_tree_t balance(AVL_tree_t *root);
 	AVL_tree_t *rotateLeft(AVL_tree_t *root);
 	AVL_tree_t *rotateRight(AVL_tree_t *root);
 	AVL_tree_t *bigRotateLeft(AVL_tree_t *root) {
@@ -123,18 +124,17 @@ template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 	if (!root)
 		return new AVL_tree_t(elem);
+	h_++;
 	if (elem < val_) {
 		if (left_)
 			return left_->insert(elem, root);
 		left_ = new AVL_tree_t(elem, this);
-		return root;
-		//balance
 	}
-	if (right_)
+	else if (right_)
 		return right_->insert(elem, root);
-	right_ = new AVL_tree_t(elem, this);
-	return root;
-//	return balance(root);
+	else
+		right_ = new AVL_tree_t(elem, this);
+	return balance(root);
 }
 
 template <typename T>
@@ -310,6 +310,11 @@ void AVL_tree_t<T>::delete_tree() {
 				node = right;
 		}
 	} while (!stack.empty());
+}
+
+template <typename T>
+AVL_tree_t<T> *AVL_tree_t<T>::balance(AVL_tree_t<T> *root) {
+	return root;
 }
 
 template <typename T>
