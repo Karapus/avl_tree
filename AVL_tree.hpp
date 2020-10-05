@@ -10,19 +10,14 @@ class AVL_tree_t;
 
 template <typename T>
 class AVL_set_t {
-	AVL_tree_t<T> *root_;
+	AVL_tree_t<T> *root_ = nullptr;
 	public:
-	AVL_set_t() : root_(nullptr)
+	AVL_set_t()
 	{}
 	template <typename InputIt>
 	AVL_set_t(InputIt first, InputIt last) {
-		if (first == last) {
-			root_ = nullptr;
-			return;
-		}
-		root_ = new AVL_tree_t<T>(*first++);
 		for (; first != last; first++)
-		       root_->insert(*first);
+		       insert(*first);
 	}
 	AVL_set_t(const AVL_set_t &other) = delete;
 /*	AVL_set_t(const AVL_set_t &other) :
@@ -38,10 +33,7 @@ class AVL_set_t {
 			root_->delete_tree();
 	}
 	void insert(const T &elem) {
-		if (!root_)
-			root_ = new AVL_tree_t<T>(elem);
-		else
-			root_->insert(elem);
+		root_ = root_->insert(elem, root_);
 	}
 	void erase(const T &elem) {
 		if (!root_)
@@ -55,10 +47,10 @@ class AVL_set_t {
 	bool empty() {
 		return !root_;
 	}
-	const AVL_tree_t<int> *min() {
+	const AVL_tree_t<int> *min() const{
 		return root_->min();
 	}
-	const AVL_tree_t<int> *max() {
+	const AVL_tree_t<int> *max() const{
 		return root_->max();
 	}
 };
@@ -81,16 +73,18 @@ class AVL_tree_t {
 	AVL_tree_t *bigRotateRight(AVL_tree_t *root) {
 		return rotateRight(left_->rotateLeft(root));
 	}
-	public:
 	
 	AVL_tree_t(const T &elem, AVL_tree_t *parent = nullptr) :
 		val_(elem), parent_(parent)
 	{}
-
+	~AVL_tree_t()
+	{};
+	
+	public:
 	AVL_tree_t *search(const T &elem);
 	const AVL_tree_t *search(const T &elem) const;
 
-	void insert(const T &elem);
+	AVL_tree_t *insert(const T &elem, AVL_tree_t *root);
 
 	T get_val() const {
 		return val_;
@@ -126,17 +120,21 @@ class AVL_tree_t {
 };
 
 template <typename T>
-void AVL_tree_t<T>::insert(const T &elem) {
+AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
+	if (!root)
+		return new AVL_tree_t(elem);
 	if (elem < val_) {
 		if (left_)
-			return left_->insert(elem);
+			return left_->insert(elem, root);
 		left_ = new AVL_tree_t(elem, this);
-		return;
+		return root;
+		//balance
 	}
 	if (right_)
-		return right_->insert(elem);
+		return right_->insert(elem, root);
 	right_ = new AVL_tree_t(elem, this);
-	return;
+	return root;
+//	return balance(root);
 }
 
 template <typename T>
