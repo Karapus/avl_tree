@@ -1,3 +1,4 @@
+#pragma once
 #include <forward_list>
 #include <algorithm>
 #include <iostream>
@@ -12,20 +13,19 @@ template <typename T>
 class AVL_set_t {
 	AVL_tree_t<T> *root_ = nullptr;
 	public:
-	AVL_set_t()
-	{}
+	AVL_set_t() = default;
 	template <typename InputIt>
 	AVL_set_t(InputIt first, InputIt last) {
 		for (; first != last; first++)
 		       insert(*first);
 	}
 	AVL_set_t(const AVL_set_t &other) = delete;
-/*	AVL_set_t(const AVL_set_t &other) :
-		AVL_set_t(other.begin(), other.end())
-	{}*/
+	AVL_set_t &operator = (const AVL_set_t &other) = delete;
 	AVL_set_t(AVL_set_t &&other) :
-		AVL_set_t()
-	{
+		AVL_set_t() {
+		std::swap(root_, other.root_);
+	}
+	AVL_set_t &operator = (AVL_set_t &&other) {
 		std::swap(root_, other.root_);
 	}
 	~AVL_set_t() {
@@ -39,32 +39,33 @@ class AVL_set_t {
 		if (!root_)
 			return;
 		auto node = root_->search(elem);
-		if (node == root_)
-			root_ = AVL_tree_t<T>::delete_root(root_);
-		else
-			node->delete_node();
+		root_ = node->delete_node(root_);
 	}
 	bool empty() {
 		return !root_;
 	}
 	const AVL_tree_t<int> *min() const{
-		return root_->min();
+		if (root_)
+			return root_->min();
+		return nullptr;
 	}
 	const AVL_tree_t<int> *max() const{
-		return root_->max();
+		if (root_)
+			return root_->max();
+		return nullptr;
 	}
 };
 
 template <typename T>
 class AVL_tree_t {
-	const T val_;
+	T val_;
 	AVL_tree_t *parent_,
 		   *left_ = nullptr,
 		   *right_ = nullptr;
 	signed char h_dif_ = 0;
 	private:
 
-	void transplant(AVL_tree_t *node);
+	AVL_tree_t *transplant(AVL_tree_t *node, AVL_tree_t *root);
 
 	AVL_tree_t *balance(AVL_tree_t *root);
 	AVL_tree_t *rotateLeft(AVL_tree_t *root);
@@ -79,10 +80,14 @@ class AVL_tree_t {
 	AVL_tree_t(const T &elem, AVL_tree_t *parent = nullptr) :
 		val_(elem), parent_(parent)
 	{}
-	~AVL_tree_t()
-	{};
-	
+	~AVL_tree_t() = default;
+
 	public:
+	AVL_tree_t(const AVL_tree_t &other) = delete;
+	AVL_tree_t &operator = (const AVL_tree_t &other) = delete;
+	AVL_tree_t(AVL_tree_t &&other) = delete;
+	AVL_tree_t &operator = (AVL_tree_t &&other) = delete; 
+
 	AVL_tree_t *search(const T &elem);
 	const AVL_tree_t *search(const T &elem) const;
 
@@ -120,8 +125,7 @@ class AVL_tree_t {
 	const AVL_tree_t *prev() const;
 	
 	void delete_tree();
-	void delete_node();
-	static AVL_tree_t *delete_root(AVL_tree_t *prev_root);
+	AVL_tree_t *delete_node(AVL_tree_t *root);
 };
 
 template <typename T>
@@ -148,8 +152,8 @@ AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 			node->h_dif_++;
 		else
 			node->h_dif_--;
-		if (!node->h_dif_)
-			return root;
+	//	if (!node->h_dif_)
+	//		return root;
 		root = node->balance(root);
 		if (!node->h_dif_)
 			return root;
@@ -188,65 +192,55 @@ const AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) const {
 }
 
 template <typename T>
-void AVL_tree_t<T>::delete_node() {
-	if (!left_)
-		transplant(right_);
-	else if (!right_)
-		transplant(left_);
-	else {
-		auto next = right_;
-		while (next->left_)
-			next = next->left_;
-		if (next->parent_ != this) {
-			next->transplant(next->right_);
-			next->right_ = right_;
-			next->right_->parent_ = next;
-		}
-		transplant(next);
-		next->left_ = left_;
-		next->left_->parent_ = next;
+AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
+	if (right_) {
+		auto n_node = next();
+		val_ = n_node->val_;
+		return n_node->delete_node(root);
 	}
-	delete this;
-}
+	if (left_) {
+		auto p_node = prev();
+		val_ = p_node->val_;
+		return p_node->delete_node(root);
+	}
 
-template <typename T>
-AVL_tree_t<T> *AVL_tree_t<T>::delete_root(AVL_tree_t<T> *prev_root) {
-	assert(!prev_root->parent_);
-	auto root = prev_root;
-	auto left = root->left_;
-	auto right = root->right_;
-	if (!left)
-		root = right;
-	else if (!right)
-		root = left;
-	else {
-		auto next = right;
-		while (next->left_)
-			next = next->left_;
-		if (next->parent_ != root) {
-			next->transplant(next->right_);
-			next->right_ = right;
-			next->right_->parent_ = next;
-		}
-		root = next;
-		next->left_ = left;
-		next->left_->parent_ = next;
+	auto node = this;
+	while (node->parent_) {
+		auto prev = node;
+		node = node->parent_;
+		if (node->left_ == prev)
+			node->h_dif_--;
+		else
+			node->h_dif_++;
+		if (node->h_dif_ == 1 || node->h_dif_ == -1)
+			break;
+		root = node->balance(root);
+		if (!node->h_dif_)
+			break;
 	}
-	if (root)
-		root->parent_ = nullptr;
-	delete prev_root;
+
+	if (!parent_)
+		root = nullptr;
+	else if (parent_->left_ == this)
+		parent_->left_ = nullptr;
+	else 
+		parent_->right_ = nullptr;
+	delete this;
+
 	return root;
 }
 
 template <typename T>
-void AVL_tree_t<T>::transplant(AVL_tree_t<T> *node) {
-	assert(parent_);
-	if (this == parent_->right_)
+AVL_tree_t<T> *AVL_tree_t<T>::transplant(AVL_tree_t *node, AVL_tree_t *root) {
+	if (!parent_)
+		root = node;
+	else if (this == parent_->right_)
 		parent_->right_ = node;
 	else
 		parent_->left_ = node;
 	if (node)
 		node->parent_ = parent_;
+	return root;
 }
 
 template <typename T>
@@ -318,7 +312,11 @@ void AVL_tree_t<T>::delete_tree() {
 		auto left = node->left_;
 		auto right = node->right_;
 		if (!left && !right) {
-			node->delete_node();
+			if (node->parent_->left_ == node)
+				node->parent_->left_ = nullptr;
+			else
+				node->parent_->right_ = nullptr;
+			delete node;
 			node = stack.front();
 			stack.pop_front();
 		}
@@ -434,4 +432,4 @@ AVL_tree_t<T> *AVL_tree_t<T>::rotateRight(AVL_tree_t<T> *root) {
 
 	return root;
 }
-}
+} //namespace AVL

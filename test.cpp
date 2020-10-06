@@ -8,7 +8,6 @@
 namespace {
 	using T = int;
 	constexpr T ksize = 100;
-}
 
 TEST(SearchTree, Insert) {
 	AVL::AVL_set_t<T> set;
@@ -75,8 +74,16 @@ TEST(SearchTree, Erase) {
 			l.push_front(distr(e));
 
 	AVL::AVL_set_t<T> set{l.begin(), l.end()};
-	for (auto i : l)
+	for (auto i : l) {
 		set.erase(i);
+		auto set_el = set.min();
+		auto next = (set_el) ? set_el->next() : nullptr;
+		while (next) {
+			EXPECT_LE(set_el->get_val(), next->get_val());
+			set_el = next;
+			next = set_el->next();
+		}
+	}
 	EXPECT_TRUE(set.empty());
 }
 
@@ -111,4 +118,27 @@ TEST(AVLTree, Insert) {
 		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
 		el = el->next();
 	}
+}
+
+TEST(AVLTree, Erase) {
+	std::default_random_engine e;
+	std::uniform_int_distribution<T> distr{0, ksize};
+	std::list<T> l;
+	for (std::size_t i = 0; i < ksize; i++)
+		if (distr(e) > ksize / 2)
+			l.push_back(distr(e));
+		else
+			l.push_front(distr(e));
+
+	AVL::AVL_set_t<T> set{l.begin(), l.end()};
+	for (auto i : l) {
+		set.erase(i);
+		auto set_el = set.min();
+		while (set_el) {
+			EXPECT_TRUE(std::abs(set_el->get_h_dif()) < 2);
+			set_el = set_el->next();
+		}
+	}
+	EXPECT_TRUE(set.empty());
+}
 }
