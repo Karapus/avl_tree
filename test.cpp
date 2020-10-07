@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "AVL_tree.hpp"
+#include "AVL_set.hpp"
 #include <vector>
 #include <list>
 #include <algorithm>
