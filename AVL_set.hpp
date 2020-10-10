@@ -2,6 +2,7 @@
 #include "AVL_tree.hpp"
 #include <queue>
 #include <stack>
+#include <utility>
 
 namespace AVL
 {
@@ -37,6 +38,9 @@ class AVL_set_t {
 	~AVL_set_t() {
 		delete_tree();
 	}
+	const AVL_tree_t<T> *get_root() const {
+		return root_;
+	}
 	void insert(const T &elem) {
 		root_ = root_->insert(elem, root_);
 	}
@@ -49,16 +53,17 @@ class AVL_set_t {
 	bool empty() {
 		return !root_;
 	}
-	const AVL_tree_t<int> *min() const{
+	const AVL_tree_t<T> *min() const {
 		if (root_)
 			return root_->min();
 		return nullptr;
 	}
-	const AVL_tree_t<int> *max() const{
+	const AVL_tree_t<T> *max() const {
 		if (root_)
 			return root_->max();
 		return nullptr;
 	}
+	std::size_t range_query(const std::pair<T, T> &query);
 };
 
 template <typename T>
@@ -97,4 +102,17 @@ void AVL_set_t<T>::delete_tree() {
 		}
 	} while (!nodes.empty());
 }
+
+template <typename T>
+std::size_t AVL_set_t<T>::range_query(const std::pair<T, T> &query) {
+	assert(root_);
+	auto lb = root_->lower_bound(query.first);
+	auto ub = root_->upper_bound(query.second);
+	std::size_t dist = 0;
+	while (lb != ub) {
+		lb = lb->next();
+		dist++;
+	}
+	return dist;	
+}	
 } //namespace AVL

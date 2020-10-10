@@ -33,6 +33,8 @@ class AVL_tree_t {
 
 	AVL_tree_t *search(const T &elem);
 	const AVL_tree_t *search(const T &elem) const;
+	const AVL_tree_t *lower_bound(const T &elem) const;
+	const AVL_tree_t *upper_bound(const T &elem) const;
 
 	AVL_tree_t *insert(const T &elem, AVL_tree_t *root);
 
@@ -114,8 +116,7 @@ AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) {
 	if (elem < val_) {
 		if (left_)
 			return left_->search(elem);
-		else
-			return nullptr;
+		return nullptr;
 	}
 	if (elem == val_)
 		return this;
@@ -129,13 +130,39 @@ const AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) const {
 	if (elem < val_) {
 		if (left_)
 			return left_->search(elem);
-		else
-			return nullptr;
+		return nullptr;
 	}
 	if (elem == val_)
 		return this;
 	if (right_)
 		return right_->search(elem);
+	return nullptr;
+}
+
+template <typename T>
+const AVL_tree_t<T> *AVL_tree_t<T>::lower_bound(const T &elem) const {
+	if (elem < val_) {
+		if (left_ && left_->val_ >= elem)
+			return left_->lower_bound(elem);
+		return this;
+	}
+	if (elem == val_) {
+		return this;
+	}
+	if (right_)
+		return right_->lower_bound(elem);
+	return nullptr;
+}
+
+template <typename T>
+const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem) const {
+	if (elem < val_) {
+		if (left_ && left_->val_ > elem)
+			return left_->upper_bound(elem);
+		return this;
+	}
+	if (right_)
+		return right_->upper_bound(elem);
 	return nullptr;
 }
 
