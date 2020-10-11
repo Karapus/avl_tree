@@ -142,8 +142,10 @@ const AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) const {
 template <typename T>
 const AVL_tree_t<T> *AVL_tree_t<T>::lower_bound(const T &elem) const {
 	if (elem < val_) {
-		if (left_ && left_->val_ >= elem)
-			return left_->lower_bound(elem);
+		if (left_) {
+			auto res = left_->lower_bound(elem);
+			return res ? res : this;
+		}
 		return this;
 	}
 	if (elem == val_) {
@@ -157,8 +159,10 @@ const AVL_tree_t<T> *AVL_tree_t<T>::lower_bound(const T &elem) const {
 template <typename T>
 const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem) const {
 	if (elem < val_) {
-		if (left_ && left_->val_ > elem)
-			return left_->upper_bound(elem);
+		if (left_) {
+			auto res = left_->upper_bound(elem);
+			return res ? res : this;
+		}
 		return this;
 	}
 	if (right_)
