@@ -5,6 +5,7 @@
 #ifdef STD
 #include <set>
 #include <iterator>
+#include <cassert>
 #else
 #include "AVL_set.hpp"
 #endif
@@ -29,16 +30,21 @@ int main() {
 	std::size_t n;
 	std::cin >> n;
 #ifdef STD
-		std::set<int> set;
+	std::set<int> set;
 #else
-		AVL::AVL_set_t<int> set;
+	AVL::AVL_set_t<int> set;
 #endif
-
+#ifdef TIME
+	auto buildup_beg = std::chrono::high_resolution_clock::now();
+#endif
 	for (auto i = 0LU; i < n; ++i) {
 		int tmp = 0;
 		std::cin >> tmp;
 		set.insert(tmp);
 	}
+#ifdef TIME
+	auto buildup_end = std::chrono::high_resolution_clock::now();
+#endif
 	std::size_t n_queries;
 	std::cin >> n_queries;
 	std::queue<std::pair<int, int>> queries;
@@ -51,7 +57,7 @@ int main() {
 	
 	std::queue<std::size_t> answers;
 #ifdef TIME
-	auto beg = std::chrono::high_resolution_clock::now();
+	auto queries_beg = std::chrono::high_resolution_clock::now();
 #endif
 	while (!queries.empty()) {
 #ifdef STD
@@ -62,8 +68,9 @@ int main() {
 		queries.pop();
 	}
 #ifdef TIME
-	auto end = std::chrono::high_resolution_clock::now();
-	std::cout << std::chrono::duration<double>(end - beg).count() << std::endl;
+	auto queries_end = std::chrono::high_resolution_clock::now();
+	std::cout << "Build-up time, s:" << std::endl << std::chrono::duration<double>(buildup_end - buildup_beg).count() << std::endl
+		<< "Queries time, s:" << std::endl << std::chrono::duration<double>(queries_end - queries_beg).count() << std::endl;
 #else	
 	while (!answers.empty()) {
 		std::cout << answers.front() << ' ';
