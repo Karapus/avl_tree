@@ -17,6 +17,7 @@
 #ifdef STD
 namespace {
 	std::size_t range_query(const std::set<int> &set, std::pair<int, int> query) {
+		assert(query.first <= query.second);
 		auto first_it = set.lower_bound(query.first);
 		auto second_it = set.upper_bound(query.second);
 		return std::distance(first_it, second_it);
@@ -33,7 +34,7 @@ int main() {
 		AVL::AVL_set_t<int> set;
 #endif
 
-	for (auto i = 0LU; i < n; i++) {
+	for (auto i = 0LU; i < n; ++i) {
 		int tmp = 0;
 		std::cin >> tmp;
 		set.insert(tmp);
@@ -41,7 +42,7 @@ int main() {
 	std::size_t n_queries;
 	std::cin >> n_queries;
 	std::queue<std::pair<int, int>> queries;
-	for (auto i = 0LU; i < n_queries; i++) {
+	for (auto i = 0LU; i < n_queries; ++i) {
 		int first;
 		int second;
 		std::cin >> first >> second;

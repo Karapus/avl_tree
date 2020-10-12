@@ -3,6 +3,7 @@
 #include <queue>
 #include <stack>
 #include <utility>
+#include <cassert>
 
 namespace AVL
 {
@@ -42,6 +43,7 @@ class AVL_set_t {
 		return root_;
 	}
 	void insert(const T &elem) {
+		assert(!root_ || (root_ && !root_->search(elem)));
 		root_ = root_->insert(elem, root_);
 	}
 	void erase(const T &elem) {
@@ -105,9 +107,9 @@ void AVL_set_t<T>::delete_tree() {
 
 template <typename T>
 std::size_t AVL_set_t<T>::range_query(const std::pair<T, T> &query) {
+	assert(query.first <= query.second);
 	auto lb = root_->lower_bound(query.first);
 	auto ub = root_->upper_bound(query.second);
-//	std::cout << (ub ? ub->get_val() : -100) << '\n';
 	std::size_t dist = 0;
 	while (lb != ub) {
 		lb = lb->next();

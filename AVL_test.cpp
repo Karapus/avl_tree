@@ -14,7 +14,7 @@ TEST(SearchTree, Insert) {
 	std::default_random_engine e;
 	std::uniform_int_distribution<int> distr{0, ksize};
 	std::vector<T> v;
-	for (auto i = 0; i < ksize; i++)
+	for (auto i = 0; i < ksize; ++i)
 	{
 		auto val = distr(e);
 		v.push_back(val);
@@ -33,7 +33,7 @@ TEST(SearchTree, CtorFromRange) {
 	std::default_random_engine e;
 	std::uniform_int_distribution<T> distr{0, ksize};
 	std::vector<T> v;
-	for (std::size_t i = 0; i < ksize; i++)
+	for (std::size_t i = 0; i < ksize; ++i)
 		v.push_back(distr(e));
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	std::sort(v.begin(), v.end());
@@ -67,7 +67,7 @@ TEST(SearchTree, Erase) {
 	std::default_random_engine e;
 	std::uniform_int_distribution<T> distr{0, ksize};
 	std::list<T> l;
-	for (std::size_t i = 0; i < ksize; i++)
+	for (std::size_t i = 0; i < ksize; ++i)
 		if (distr(e) > ksize / 2)
 			l.push_back(distr(e));
 		else
@@ -91,7 +91,7 @@ TEST(AVLTree, RotateRight) {
 	std::vector<T> v{{3, 4, 2, 1, 0}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	auto el = set.min();
-	for (auto i = 0; i < 5; i++) {
+	for (auto i = 0; i < 5; ++i) {
 		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
 		el = el->next();
 	}
@@ -101,7 +101,7 @@ TEST(AVLTree, RotateLeft) {
 	std::vector<T> v{{1, 0, 2, 3, 4}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	auto el = set.min();
-	for (auto i = 0; i < 5; i++) {
+	for (auto i = 0; i < 5; ++i) {
 		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
 		el = el->next();
 	}
@@ -111,10 +111,10 @@ TEST(AVLTree, Insert) {
 	AVL::AVL_set_t<T> set;
 	std::default_random_engine e;
 	std::uniform_int_distribution<int> distr{0, ksize};
-	for (auto i = 0; i < ksize; i++)
+	for (auto i = 0; i < ksize; ++i)
 		set.insert(distr(e));
 	auto el = set.min();
-	for (auto i = 0; i < ksize; i++) {
+	for (auto i = 0; i < ksize; ++i) {
 		EXPECT_TRUE(std::abs(el->get_h_dif()) < 2);
 		el = el->next();
 	}
@@ -124,7 +124,7 @@ TEST(AVLTree, Erase) {
 	std::default_random_engine e;
 	std::uniform_int_distribution<T> distr{0, ksize};
 	std::list<T> l;
-	for (std::size_t i = 0; i < ksize; i++)
+	for (std::size_t i = 0; i < ksize; ++i)
 		if (distr(e) > ksize / 2)
 			l.push_back(distr(e));
 		else
