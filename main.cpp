@@ -1,16 +1,16 @@
 #include <iostream>
 #include <queue>
 #include <utility>
-#include <iterator>
-#include <cassert>
 
 #ifdef STD
 #include <set>
+#include <iterator>
 #else
 #include "AVL_set.hpp"
 #endif
 
 #ifdef TIME
+#define NDEBUG
 #include <chrono>
 #endif
 
@@ -62,15 +62,12 @@ int main() {
 	}
 #ifdef TIME
 	auto end = std::chrono::high_resolution_clock::now();
-#endif
-	
-	
+	std::cout << std::chrono::duration<double>(end - beg).count() << std::endl;
+#else	
 	while (!answers.empty()) {
 		std::cout << answers.front() << ' ';
 		answers.pop();
 	}
 	std::cout << std::endl;
-#ifdef TIME
-	std::cout << std::chrono::duration<double>(end - beg).count() << std::endl;
 #endif
 }
