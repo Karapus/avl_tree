@@ -43,7 +43,6 @@ class AVL_set_t {
 		return root_;
 	}
 	void insert(const T &elem) {
-		assert(!root_ || (root_ && !root_->search(elem)));
 		root_ = root_->insert(elem, root_);
 	}
 	void erase(const T &elem) {
