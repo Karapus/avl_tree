@@ -32,6 +32,9 @@ class AVL_tree_t {
 	AVL_tree_t &operator = (AVL_tree_t &&other) = delete; 
 
 	const AVL_tree_t *search(const T &elem) const;
+	AVL_tree_t *search(const T &elem) {
+		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->search(elem));
+	}
 	const AVL_tree_t *lower_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
 	const AVL_tree_t *upper_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
 
@@ -69,8 +72,14 @@ class AVL_tree_t {
 		return this;
 	}
 	const AVL_tree_t *next() const;
+	AVL_tree_t *next() {
+		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->next());
+	}
 	const AVL_tree_t *prev() const;
-	
+	AVL_tree_t *prev() {
+		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->prev());
+	}
+
 	void delete_tree();
 	AVL_tree_t *delete_node(AVL_tree_t *root);
 	AVL_tree_t *delete_leaf(AVL_tree_t *root);
@@ -151,12 +160,12 @@ const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem, const AVL_tree_t 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
 	if (right_) {
-		auto n_node = const_cast<AVL_tree_t *>(next());
+		auto n_node = next();
 		val_ = n_node->val_;
 		return n_node->delete_node(root);
 	}
 	if (left_) {
-		auto p_node = const_cast<AVL_tree_t *>(prev());
+		auto p_node = prev();
 		val_ = p_node->val_;
 		return p_node->delete_node(root);
 	}

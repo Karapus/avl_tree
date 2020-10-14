@@ -48,7 +48,7 @@ class AVL_set_t {
 	void erase(const T &elem) {
 		if (!root_)
 			return;
-		auto node = const_cast<AVL_tree_t<T> *>(root_->search(elem));
+		auto node = root_->search(elem);
 		root_ = node->delete_node(root_);
 	}
 	bool empty() {
