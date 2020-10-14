@@ -31,7 +31,6 @@ class AVL_tree_t {
 	AVL_tree_t(AVL_tree_t &&other) = delete;
 	AVL_tree_t &operator = (AVL_tree_t &&other) = delete; 
 
-	AVL_tree_t *search(const T &elem);
 	const AVL_tree_t *search(const T &elem) const;
 	const AVL_tree_t *lower_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
 	const AVL_tree_t *upper_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
@@ -69,10 +68,7 @@ class AVL_tree_t {
 			return right_->max();
 		return this;
 	}
-	AVL_tree_t *next();
 	const AVL_tree_t *next() const;
-	
-	AVL_tree_t *prev();
 	const AVL_tree_t *prev() const;
 	
 	void delete_tree();
@@ -109,20 +105,6 @@ AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 			return root;
 	}
 	return root;
-}
-
-template <typename T>
-AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) {
-	if (elem < val_) {
-		if (left_)
-			return left_->search(elem);
-		return nullptr;
-	}
-	if (elem == val_)
-		return this;
-	if (right_)
-		return right_->search(elem);
-	return nullptr;
 }
 
 template <typename T>
@@ -169,12 +151,12 @@ const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem, const AVL_tree_t 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
 	if (right_) {
-		auto n_node = next();
+		auto n_node = const_cast<AVL_tree_t *>(next());
 		val_ = n_node->val_;
 		return n_node->delete_node(root);
 	}
 	if (left_) {
-		auto p_node = prev();
+		auto p_node = const_cast<AVL_tree_t *>(prev());
 		val_ = p_node->val_;
 		return p_node->delete_node(root);
 	}
@@ -209,38 +191,12 @@ AVL_tree_t<T> *AVL_tree_t<T>::delete_leaf(AVL_tree_t *root) {
 }
 	
 template <typename T>
-AVL_tree_t<T> *AVL_tree_t<T>::next() {
-	if (right_)
-		return right_->min();
-	auto node = this;
-	auto parent = parent_;
-	while (parent && (node == parent->right_)) {
-		node = parent;
-		parent = parent->parent_;
-	}
-	return parent;
-}
-
-template <typename T>
 const AVL_tree_t<T> *AVL_tree_t<T>::next() const{
 	if (right_)
 		return right_->min();
 	auto node = this;
 	auto parent = parent_;
 	while (parent && (node == parent->right_)) {
-		node = parent;
-		parent = parent->parent_;
-	}
-	return parent;
-}
-
-template <typename T>
-AVL_tree_t<T> *AVL_tree_t<T>::prev() {
-	if (left_)
-		return left_->max();
-	auto node = this;
-	auto parent = parent_;
-	while (parent && node == parent->left_) {
 		node = parent;
 		parent = parent->parent_;
 	}
