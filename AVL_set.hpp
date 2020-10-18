@@ -1,9 +1,9 @@
 #pragma once
 #include "AVL_tree.hpp"
+#include <cassert>
 #include <queue>
 #include <stack>
 #include <utility>
-#include <cassert>
 
 namespace AVL
 {
@@ -85,15 +85,14 @@ void AVL_set_t<T>::copy_tree(const AVL_set_t &other) {
 
 template <typename T>
 void AVL_set_t<T>::delete_tree() {
-	if (!root_)
-		return;
 	std::stack<AVL_tree_t<T> *> nodes;
+	nodes.push(nullptr);
 	auto node = root_;
-	do {
+	while (node) {
 		auto left = node->get_left();
 		auto right = node->get_right();
 		if (!left && !right) {
-			root_ = node->delete_leaf(root_);
+			node->delete_leaf(root_);
 			node = nodes.top();
 			nodes.pop();
 		}
@@ -101,7 +100,7 @@ void AVL_set_t<T>::delete_tree() {
 			nodes.push(node);
 			node = left ? left : right;
 		}
-	} while (!nodes.empty());
+	}
 }
 
 template <typename T>

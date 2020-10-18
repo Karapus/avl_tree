@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 namespace AVL
 {
@@ -35,8 +36,8 @@ class AVL_tree_t {
 	AVL_tree_t *search(const T &elem) {
 		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->search(elem));
 	}
-	const AVL_tree_t *lower_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
-	const AVL_tree_t *upper_bound(const T &elem, const AVL_tree_t *prev = nullptr) const;
+	const AVL_tree_t *lower_bound(const T &elem) const;
+	const AVL_tree_t *upper_bound(const T &elem) const;
 
 	AVL_tree_t *insert(const T &elem, AVL_tree_t *root);
 
@@ -62,14 +63,18 @@ class AVL_tree_t {
 		return parent_;
 	}
 	AVL_tree_t *min() {
-		if (left_)
-			return left_->min();
-		return this;
+		assert(this);
+		auto node = this;
+		while (node->left_)
+			node = node->left_;
+		return node;
 	}
 	AVL_tree_t *max() {
-		if (right_)
-			return right_->max();
-		return this;
+		assert(this);
+		auto node = this;
+		while (node->right_)
+			node = node->right_;
+		return node;
 	}
 	const AVL_tree_t *next() const;
 	AVL_tree_t *next() {
@@ -80,7 +85,6 @@ class AVL_tree_t {
 		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->prev());
 	}
 
-	void delete_tree();
 	AVL_tree_t *delete_node(AVL_tree_t *root);
 	AVL_tree_t *delete_leaf(AVL_tree_t *root);
 };
@@ -89,19 +93,25 @@ template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 	if (!root)
 		return new AVL_tree_t(elem);
-	if (elem < val_) {
-		if (left_)
-			return left_->insert(elem, root);
-		left_ = new AVL_tree_t(elem, this);
-		h_dif_++;
+	auto node = root;
+	while (true) {
+		if (elem < node->val_) {
+			if (!node->left_) {
+				node->left_ = new AVL_tree_t(elem, node);
+				node->h_dif_++;
+				break;
+			}
+			node = node->left_;
+		}
+		else if (!node->right_) {
+			node->right_ = new AVL_tree_t(elem, node);
+			node->h_dif_--;
+			break;
+		}
+		else
+			node = node->right_;	
 	}
-	else if (right_)
-		return right_->insert(elem, root);
-	else {
-		right_ = new AVL_tree_t(elem, this);
-		h_dif_--;
-	}
-	auto node = this;
+
 	while (node->parent_) {
 		auto prev = node;
 		node = node->parent_;
@@ -118,59 +128,60 @@ AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 
 template <typename T>
 const AVL_tree_t<T> *AVL_tree_t<T>::search(const T &elem) const {
-	if (elem < val_) {
-		if (left_)
-			return left_->search(elem);
-		return nullptr;
+	auto node = this;
+	while (node) {
+		if (elem < node->val_)
+			node = node->left_;
+		else if (elem > node->val_)
+			node = node->right_;
+		else
+			return node;
 	}
-	if (elem == val_)
-		return this;
-	if (right_)
-		return right_->search(elem);
 	return nullptr;
 }
 
 template <typename T>
-const AVL_tree_t<T> *AVL_tree_t<T>::lower_bound(const T &elem, const AVL_tree_t *prev) const {
-	if (elem < val_) {
-		if (left_)
-			return left_->lower_bound(elem, this);
-		return this;
+const AVL_tree_t<T> *AVL_tree_t<T>::lower_bound(const T &elem) const {
+	const AVL_tree_t *prev = nullptr;
+	auto node = this;
+	while (node) {
+		if (elem < node->val_) {
+			prev = node;
+			node = node->left_;
+		}
+		else if (elem > node->val_)
+			node = node->right_;
+		else
+			return node;
 	}
-	if (elem == val_) {
-		return this;
-	}
-	if (right_)
-		return right_->lower_bound(elem, prev);
 	return prev;
 }
 
 template <typename T>
-const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem, const AVL_tree_t *prev) const {
-	if (elem < val_) {
-		if (left_)
-			return left_->upper_bound(elem, this);
-		return this;
+const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem) const {
+	const AVL_tree_t *prev = nullptr;
+	auto node = this;
+	while (node) {
+		if (elem < node->val_) {
+			prev = node;
+			node = node->left_;
+		}
+		else
+			node = node->right_;
 	}
-	if (right_)
-		return right_->upper_bound(elem, prev);
 	return prev;
 }
 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
-	if (right_) {
-		auto n_node = next();
-		val_ = n_node->val_;
-		return n_node->delete_node(root);
-	}
-	if (left_) {
-		auto p_node = prev();
-		val_ = p_node->val_;
-		return p_node->delete_node(root);
-	}
-
 	auto node = this;
+	while (node->right_ || node->left_) {
+		auto next = node->right_ ? node->right_->min() : node->left_->max();
+		node->val_ = next->val_;
+		node = next;
+	}
+	
+	auto del_node = node;
 	while (node->parent_) {
 		auto prev = node;
 		node = node->parent_;
@@ -184,11 +195,12 @@ AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
 		if (!node->h_dif_)
 			break;
 	}
-	return delete_leaf(root);
+	return del_node->delete_leaf(root);
 }
 
 template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::delete_leaf(AVL_tree_t *root) {
+	assert(!left_ && !right_);
 	if (!parent_)
 		root = nullptr;
 	else if (parent_->left_ == this)

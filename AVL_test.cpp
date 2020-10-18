@@ -52,13 +52,13 @@ TEST(SearchTree, DeleteRootNoChildren) {
 }
 
 TEST(SearchTree, DeleteRootLeftNode) {
-	std::vector<T> v{{1, 2, 3}};
+	std::vector<T> v{{1, 2}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	set.erase(1);
 }
 
 TEST(SearchTree, DeleteRootRightNode) {
-	std::vector<T> v{{3, 2, 1}};
+	std::vector<T> v{{3, 2}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	set.erase(3);
 }
@@ -173,4 +173,5 @@ TEST(RangeQuery, RangeQuery) {
 	EXPECT_EQ(set.range_query({4, 4}), 0);
 	EXPECT_EQ(set.range_query({0, 0}), 0);
 }
+
 }

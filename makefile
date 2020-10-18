@@ -1,6 +1,7 @@
 CFLAGS=-Wall -Wextra
+INCLUDES=AVL_tree.hpp AVL_set.hpp
 
-all:	avl_test query.out stdquery.out q_time.out stdq_time.out
+all:	clean avl_test query.out stdquery.out q_time.out stdq_time.out
 
 avl_test: AVL_test.cpp
 	g++ $(CFLAGS) -O2 -g $< -o avl_test.out -lgtest_main -lgtest
@@ -12,11 +13,14 @@ query.out: main.cpp
 stdquery.out: main.cpp
 	g++ $(CFLAGS) -Og -g -DSTD $< -o $@
 
-q_time.out: main.cpp
+q_time.out: main.cpp 
 	g++ $(CFLAGS) -O2 -DSTD -DTIME $< -o $@
 
 stdq_time.out: main.cpp
 	g++ $(CFLAGS) -O2 -DSTD -DTIME $< -o $@
+AVL_test.cpp: $(INCLUDES)
+main.cpp: $(INCLUDES)
 
 clean:
-	rm vgcore.*
+	#rm vgcore.*
+	rm *.out
