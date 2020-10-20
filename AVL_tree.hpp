@@ -9,8 +9,8 @@ class AVL_tree_t {
 	AVL_tree_t *parent_,
 		   *left_ = nullptr,
 		   *right_ = nullptr;
+
 	signed char h_dif_ = 0;
-	
 	AVL_tree_t *balance(AVL_tree_t *root);
 	AVL_tree_t *rotateLeft(AVL_tree_t *root);
 	AVL_tree_t *rotateRight(AVL_tree_t *root);
@@ -21,6 +21,11 @@ class AVL_tree_t {
 		return rotateRight(left_->rotateLeft(root));
 	}
 	
+	std::size_t size_ = 1;
+	void update_size() {
+		size_ = 1 + (left_ ? left_->size_ : 0) + (right_ ? right_->size_ : 0);
+	}
+
 	AVL_tree_t(const T &elem, AVL_tree_t *parent = nullptr) :
 		val_(elem), parent_(parent)
 	{}
@@ -46,6 +51,9 @@ class AVL_tree_t {
 	}
 	int get_h_dif() const {
 		return h_dif_;
+	}
+	std::size_t get_size() const {
+		return size_;
 	}
 	AVL_tree_t *get_left(){
 		return left_;
@@ -95,6 +103,7 @@ AVL_tree_t<T> *AVL_tree_t<T>::insert(const T &elem, AVL_tree_t *root) {
 		return new AVL_tree_t(elem);
 	auto node = root;
 	while (true) {
+		node->size_++;
 		if (elem < node->val_) {
 			if (!node->left_) {
 				node->left_ = new AVL_tree_t(elem, node);
@@ -182,6 +191,12 @@ AVL_tree_t<T> *AVL_tree_t<T>::delete_node(AVL_tree_t *root) {
 	}
 	
 	auto del_node = node;
+	del_node->size_ = 0;
+	while (node->parent_) {
+		node = node->parent_;
+		node->size_--;
+	}
+	node = del_node;
 	while (node->parent_) {
 		auto prev = node;
 		node = node->parent_;
@@ -279,14 +294,14 @@ AVL_tree_t<T> *AVL_tree_t<T>::balance(AVL_tree_t<T> *root) {
 		}
 		else {
 			switch (left_->right_->h_dif_) {
-				case -1:
+				case 1:
 					h_dif_ = -1;
 					left_->h_dif_ = 0;
 					break;
 				case 0:
 					h_dif_ = left_->h_dif_ = 0;
 					break;
-				case 1:
+				case -1:
 					h_dif_ = 0;
 					left_->h_dif_ = 1;
 					break;
@@ -302,6 +317,7 @@ template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::rotateLeft(AVL_tree_t<T> *root) {
 	AVL_tree_t *going_up = right_;
 	AVL_tree_t *trfd_subtree = going_up->left_;
+	going_up->size_ = size_;
 	
 	if (trfd_subtree)
 		trfd_subtree->parent_ = this;
@@ -316,6 +332,8 @@ AVL_tree_t<T> *AVL_tree_t<T>::rotateLeft(AVL_tree_t<T> *root) {
 	parent_ = going_up;
 	going_up->left_ = this;
 
+	update_size();
+
 	return root;
 }
 
@@ -323,6 +341,7 @@ template <typename T>
 AVL_tree_t<T> *AVL_tree_t<T>::rotateRight(AVL_tree_t<T> *root) {
 	AVL_tree_t *going_up = left_;
 	AVL_tree_t *trfd_subtree = going_up->right_;
+	going_up->size_ = size_;
 	
 	if (trfd_subtree)
 		trfd_subtree->parent_ = this;
@@ -336,6 +355,8 @@ AVL_tree_t<T> *AVL_tree_t<T>::rotateRight(AVL_tree_t<T> *root) {
 	
 	parent_ = going_up;
 	going_up->right_ = this;
+
+	update_size();
 
 	return root;
 }

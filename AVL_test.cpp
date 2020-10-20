@@ -125,10 +125,7 @@ TEST(AVLTree, Erase) {
 	std::uniform_int_distribution<T> distr{0, ksize};
 	std::list<T> l;
 	for (std::size_t i = 0; i < ksize; ++i)
-		if (distr(e) > ksize / 2)
-			l.push_back(distr(e));
-		else
-			l.push_front(distr(e));
+		l.push_front(distr(e));
 
 	AVL::AVL_set_t<T> set{l.begin(), l.end()};
 	for (auto i : l) {
@@ -174,4 +171,40 @@ TEST(RangeQuery, RangeQuery) {
 	EXPECT_EQ(set.range_query({0, 0}), 0);
 }
 
+TEST(OrderStat, SizeInsert) {
+	std::default_random_engine e;
+	std::uniform_int_distribution<T> distr{0, ksize};
+	std::list<T> l;
+	for (std::size_t i = 0; i < ksize; ++i)
+		l.push_front(distr(e));
+
+	AVL::AVL_set_t<T> set{l.begin(), l.end()};
+	auto el = set.min();
+	while (el) {
+		auto left = el->get_left();
+		auto right = el->get_right();
+		EXPECT_EQ(el->get_size(), (left ? left->get_size() : 0) + (right ? right->get_size() : 0) + 1);
+		el = el->next();
+	}
+}
+
+TEST(OrderStat, SizeErase) {
+	std::default_random_engine e;
+	std::uniform_int_distribution<T> distr{0, ksize};
+	std::list<T> l;
+	for (std::size_t i = 0; i < ksize; ++i)
+		l.push_front(distr(e));
+
+	AVL::AVL_set_t<T> set{l.begin(), l.end()};
+	for (auto i : l) {
+		set.erase(i);
+		auto el = set.min();
+		while (el) {
+			auto left = el->get_left();
+			auto right = el->get_right();
+			EXPECT_EQ(el->get_size(), (left ? left->get_size() : 0) + (right ? right->get_size() : 0) + 1);
+			el = el->next();
+		}
+	}
+}
 }
