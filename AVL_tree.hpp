@@ -4,7 +4,7 @@
 namespace AVL
 {
 template <typename T>
-class AVL_tree_t {
+class AVL_tree_t final {
 	T val_;
 	AVL_tree_t *parent_,
 		   *left_ = nullptr,

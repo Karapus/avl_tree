@@ -8,7 +8,7 @@
 namespace AVL
 {
 template <typename T>
-class AVL_set_t {
+class AVL_set_t final {
 	AVL_tree_t<T> *root_ = nullptr;
 	void copy_tree(const AVL_set_t &other);
 	void delete_tree();
