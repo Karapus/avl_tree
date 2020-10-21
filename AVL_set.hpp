@@ -114,5 +114,5 @@ std::size_t AVL_set_t<T>::range_query(const std::pair<T, T> &query) {
 		dist++;
 	}
 	return dist;	
-}	
+}
 } //namespace AVL

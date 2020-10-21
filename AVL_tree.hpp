@@ -23,7 +23,7 @@ class AVL_tree_t final {
 	
 	std::size_t size_ = 1;
 	void update_size() {
-		size_ = 1 + (left_ ? left_->size_ : 0) + (right_ ? right_->size_ : 0);
+		size_ = get_lsize() + get_rsize() + 1;
 	}
 
 	AVL_tree_t(const T &elem, AVL_tree_t *parent = nullptr) :
@@ -35,7 +35,7 @@ class AVL_tree_t final {
 	AVL_tree_t(const AVL_tree_t &other) = delete;
 	AVL_tree_t &operator = (const AVL_tree_t &other) = delete;
 	AVL_tree_t(AVL_tree_t &&other) = delete;
-	AVL_tree_t &operator = (AVL_tree_t &&other) = delete; 
+	AVL_tree_t &operator = (AVL_tree_t &&other) = delete;
 
 	const AVL_tree_t *search(const T &elem) const;
 	AVL_tree_t *search(const T &elem) {
@@ -43,6 +43,9 @@ class AVL_tree_t final {
 	}
 	const AVL_tree_t *lower_bound(const T &elem) const;
 	const AVL_tree_t *upper_bound(const T &elem) const;
+
+	const AVL_tree_t *get_nth(std::size_t n) const;
+	std::size_t order(const T &val) const;
 
 	AVL_tree_t *insert(const T &elem, AVL_tree_t *root);
 
@@ -54,6 +57,12 @@ class AVL_tree_t final {
 	}
 	std::size_t get_size() const {
 		return size_;
+	}
+	std::size_t get_lsize() const {
+		return left_ ? left_->size_ : 0;
+	}
+	std::size_t get_rsize() const {
+		return right_ ? right_->size_ : 0;
 	}
 	AVL_tree_t *get_left(){
 		return left_;
@@ -179,6 +188,43 @@ const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem) const {
 			node = node->right_;
 	}
 	return prev;
+}
+
+template <typename T>
+const AVL_tree_t<T> *AVL_tree_t<T>::get_nth(std::size_t n) const {
+	assert(n <= size_);
+	auto node = this;
+	while (node) {
+		auto n_notmore = node->get_lsize() + 1;
+		if (n == n_notmore)
+			break;
+		if (n < n_notmore)
+			node = node->left_;
+		else {
+			n -= n_notmore;
+			node = node->right_;
+		}
+	}
+	return node;
+}
+
+template <typename T>
+std::size_t AVL_tree_t<T>::order(const T &val) const {
+	auto node = this;
+	std::size_t res = 0;
+	while (node) {
+		if (val < node->val_)
+			node = node->left_;
+		else if (val == node->val_) {
+			res += node->get_lsize();
+			break;
+		}
+		else {
+			res += node->get_lsize() + 1;
+			node = node->right_;
+		}
+	}
+	return res;
 }
 
 template <typename T>
