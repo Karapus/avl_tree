@@ -79,19 +79,25 @@ class AVL_tree_t final {
 	const AVL_tree_t *get_parent() const {
 		return parent_;
 	}
-	AVL_tree_t *min() {
+	const AVL_tree_t *min() const{
 		assert(this);
 		auto node = this;
 		while (node->left_)
 			node = node->left_;
 		return node;
 	}
-	AVL_tree_t *max() {
+	AVL_tree_t *min() {
+		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->min());
+	}
+	const AVL_tree_t *max() const{
 		assert(this);
 		auto node = this;
 		while (node->right_)
 			node = node->right_;
 		return node;
+	}
+	AVL_tree_t *max() {
+		return const_cast<AVL_tree_t *>(const_cast<const AVL_tree_t *>(this)->max());
 	}
 	const AVL_tree_t *next() const;
 	AVL_tree_t *next() {
@@ -192,7 +198,7 @@ const AVL_tree_t<T> *AVL_tree_t<T>::upper_bound(const T &elem) const {
 
 template <typename T>
 const AVL_tree_t<T> *AVL_tree_t<T>::get_nth(std::size_t n) const {
-	assert(n <= size_);
+	assert(n && n <= size_);
 	auto node = this;
 	while (node) {
 		auto n_notmore = node->get_lsize() + 1;

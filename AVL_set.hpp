@@ -64,7 +64,9 @@ class AVL_set_t final {
 			return root_->max();
 		return nullptr;
 	}
-	std::size_t range_query(const std::pair<T, T> &query);
+	std::size_t range_query(const std::pair<T, T> &query) {
+		return  root_->order(query.second) - root_->order(query.first) + (root_->search(query.second) ? 1 : 0);
+	}
 };
 
 template <typename T>
@@ -102,18 +104,5 @@ void AVL_set_t<T>::delete_tree() {
 			node = left ? left : right;
 		}
 	}
-}
-
-template <typename T>
-std::size_t AVL_set_t<T>::range_query(const std::pair<T, T> &query) {
-	assert(query.first <= query.second);
-	auto lb = root_->lower_bound(query.first);
-	auto ub = root_->upper_bound(query.second);
-	std::size_t dist = 0;
-	while (lb != ub) {
-		lb = lb->next();
-		dist++;
-	}
-	return dist;	
 }
 } //namespace AVL
