@@ -212,14 +212,14 @@ TEST(OrderStat, GetNth) {
 	std::vector<T> v{{0, 1, 2, 3, 4, 5}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
 	auto sz = v.size();
-	for (int i = 0; i < sz; ++i)
+	for (auto i = 0u; i < sz; ++i)
 		EXPECT_EQ(set.get_root()->get_nth(i + 1), set.get_root()->search(v[i]));
 }
 
 TEST(OrderStat, Order) {
 	std::vector<T> v{{1, 3, 5, 7, 9, 11}};
 	AVL::AVL_set_t<T> set{v.begin(), v.end()};
-	for (int i = 0; i < 12; i++)
+	for (auto i = 0u; i < 12; i++)
 		 EXPECT_EQ(set.get_root()->order(i), i / 2);
 	EXPECT_EQ(set.get_root()->order(12), v.size());
 }

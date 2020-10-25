@@ -71,11 +71,12 @@ template <typename T>
 void AVL_set_t<T>::copy_tree(const AVL_set_t &other) {
 	if (!other.root_)
 		return;
-	std::queue<const AVL_tree_t<T> *> nodes{other.root_};
+	std::queue<const AVL_tree_t<T> *> nodes;
+	nodes.push(other.root_);
 	while (!nodes.empty()) {
 		auto node = nodes.front();
 		nodes.pop();
-		root_ = root_->insert(node->get_val());
+		root_ = root_->insert(node->get_val(), root_);
 		if (node->left)
 			nodes.push(node->left);
 		if (node->right)

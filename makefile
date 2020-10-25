@@ -7,20 +7,20 @@ avl_test: AVL_test.cpp
 	g++ $(CFLAGS) -O2 -g $< -o avl_test.out -lgtest_main -lgtest
 	valgrind ./avl_test.out
 
-query.out: main.cpp
+query.out: range_query.cpp
 	g++ $(CFLAGS) -Og -g $< -o $@
 
-stdquery.out: main.cpp
+stdquery.out: range_query.cpp
 	g++ $(CFLAGS) -Og -g -DSTD $< -o $@
 
-q_time.out: main.cpp 
+q_time.out: range_query.cpp
 	g++ $(CFLAGS) -O2 -DSTD -DTIME $< -o $@
 
-stdq_time.out: main.cpp
+stdq_time.out: range_query.cpp
 	g++ $(CFLAGS) -O2 -DSTD -DTIME $< -o $@
 AVL_test.cpp: $(INCLUDES)
-main.cpp: $(INCLUDES)
+range_query.cpp: $(INCLUDES)
 
 clean:
-	#rm vgcore.*
-	rm *.out
+	rm -f vgcore.*
+	rm -f *.out
