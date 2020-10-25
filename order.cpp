@@ -57,6 +57,6 @@ int main() {
 	auto end = std::chrono::high_resolution_clock::now();
 	std::clog << std::endl << std::chrono::duration<double>(end - beg).count() << std::endl;
 #endif
-	std::cout	<< process_queries<std::size_t, int>([&set](auto n){ return set.get_root()->get_nth(n)->get_val(); })		\
+	std::cout	<< process_queries<std::size_t, int>([&set](auto n){ return set.get_root()->get_nth(n)->get_val(); }) << std::endl \
 			<< process_queries<int, std::size_t>([&set](auto key){ return set.get_root()->order(key); }) << std::endl;
 }

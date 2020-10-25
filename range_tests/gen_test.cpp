@@ -3,6 +3,7 @@
 #include <random>
 #include <ctime>
 
+namespace {
 void gen_test(int nkeys, int keymax, int nqrs, std::ofstream &ftest, std::ofstream &fanws) {
 	int spacing = keymax / nkeys;
 	spacing = (spacing) ? spacing : 1;
@@ -33,6 +34,7 @@ void gen_test(int nkeys, int keymax, int nqrs, std::ofstream &ftest, std::ofstre
 		}
 	}
 	fanws << std::endl;
+}
 }
 
 int main() {
